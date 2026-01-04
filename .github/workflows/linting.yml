@@ -33,8 +33,12 @@ jobs:
         run: |
           pip install pylint
 <<<<<<< HEAD
+<<<<<<< HEAD
           pylint .
 =======
           pylint **/*.py
           
 >>>>>>> c3ad2f2 (ci: fix module error)
+=======
+          pylint .
+>>>>>>> 379b947 (ci: fix module error)
