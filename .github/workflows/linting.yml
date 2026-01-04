@@ -32,3 +32,4 @@ jobs:
       - name: Run Pylint
         run: |
           pip install pylint
+          pylint .
