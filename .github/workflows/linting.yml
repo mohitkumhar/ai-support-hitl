@@ -24,7 +24,7 @@ jobs:
           pip install flake8
           flake8 .
 
-      - name: Run Pyliny
+      - name: Run Pylint
         run: |
           pip install pylint
           pylint **/*.py
