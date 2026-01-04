@@ -18,4 +18,8 @@ jobs:
         run: |
           pip install ruff
           ruff check . --fix
-          
+      
+      - name: Run Flake-8 Linting
+        run: |
+          pip install flake-8
+          flake8 .
