@@ -32,4 +32,8 @@ jobs:
       - name: Run Pylint
         run: |
           pip install pylint
+<<<<<<< HEAD
           pylint .
+=======
+          pylint .
+>>>>>>> 517c6a8 (feat: added policy data insertion in vector db)
