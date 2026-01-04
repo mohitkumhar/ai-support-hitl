@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       
       - name: Run Ruff Linting
         run: |
@@ -23,3 +28,8 @@ jobs:
         run: |
           pip install flake8
           flake8 .
+
+      - name: Run Pylint
+        run: |
+          pip install pylint
+          pylint .
