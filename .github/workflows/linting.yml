@@ -32,4 +32,9 @@ jobs:
       - name: Run Pylint
         run: |
           pip install pylint
+<<<<<<< HEAD
           pylint .
+=======
+          pylint **/*.py
+          
+>>>>>>> c3ad2f2 (ci: fix module error)
