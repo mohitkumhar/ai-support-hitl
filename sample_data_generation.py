@@ -1,5 +1,10 @@
+"""
+    This is the Sample ticket data generation file, for testing purposes.
+"""
+
 import datetime
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 # 1. Setup MongoDB Connection
 client = MongoClient("mongodb://localhost:27017/")
@@ -99,6 +104,15 @@ for i in range(31, 41):
 
 
 def upload_data():
+    """
+    This Function uploads the generated sample data
+    to MongoDB collections.
+    The Generated Data includes:
+    1. Pending Tickets
+    2. AI Drafted Tickets
+    3. Solved Tickets
+    4. Escalated Tickets
+    """
     try:
         # Clear existing test data
         pending_col.delete_many({})
@@ -118,7 +132,7 @@ def upload_data():
         total_docs = len(pending_data) + len(drafted_data) + len(solved_data) + len(escalated_data)
 
         print(f"""✅ Success: {total_docs} documents successfully uploaded.""")
-    except Exception as e:
+    except ConnectionFailure as e:
         print(f"❌ Error uploading data: {e}")
 
 
