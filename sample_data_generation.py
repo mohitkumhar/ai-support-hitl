@@ -23,7 +23,8 @@ for i in range(1, 11):
         'issue': f"Network connectivity issue reported by user {i}",
         'used_policy': "Standard Network Protocol",
         'metadata': {
-            'ticket_creation_time': base_time + datetime.timedelta(minutes=i*10),
+            'ticket_creation_time':
+                base_time + datetime.timedelta(minutes=i*10),
             'category': "Technical",
             'priority': 'medium',
             'is_drafted': False
@@ -37,7 +38,8 @@ for i in range(11, 21):
         'ticket_id': f"TKT_{i:04d}",
         'issue': f"Request for account upgrade - Tier {i-10}",
         'used_policy': "Subscription Upgrade Policy",
-        'ai_drafted_response': "Your account upgrade request has been processed successfully.",
+        'ai_drafted_response':
+            "Your account upgrade request has been processed successfully.",
         'used_reference_ticket_id': f"TKT_{i-10:04d}",
         'confidence': 0.88,
         'metadata': {
@@ -57,7 +59,8 @@ for i in range(21, 31):
         'ticket_id': f"TKT_{i:04d}",
         'issue': f"Hardware failure report #{i}",
         'resolution': "Replacement unit shipped and tracking number provided.",
-        'ai_drafted_response': "We have processed your replacement. Your tracking ID is XYZ.",
+        'ai_drafted_response':
+            "We have processed your replacement. Your tracking ID is XYZ.",
         'used_policy': "Hardware Warranty Policy",
         'used_reference_ticket_id': "REF_GLOBAL_01",
         'confidence': 0.95,
@@ -78,7 +81,8 @@ for i in range(31, 41):
         'ticket_id': f"TKT_{i:04d}",
         'issue': f"Urgent security breach or payment failure reported by VIP user {i}",
         'used_policy': "Critical Escalation Protocol",
-        'ai_drafted_response': "This ticket is Escalated. A senior manager is reviewing your case.",
+        'ai_drafted_response':
+            "This ticket is Escalated. A senior manager is reviewing your case.",
         'used_reference_ticket_id': f"TKT_{i-20:04d}",
         'confidence': 0.65,  # Usually lower confidence for escalated items
         'metadata': {
@@ -90,7 +94,9 @@ for i in range(31, 41):
         }
     })
 
+
 # --- DATABASE INSERTION ---
+
 
 def upload_data():
     try:
@@ -108,10 +114,13 @@ def upload_data():
             solved_col.insert_many(solved_data)
         if escalated_data:
             escalated_col.insert_many(escalated_data)
-            
-        print(f"✅ Success: {len(pending_data) + len(drafted_data) + len(solved_data) + len(escalated_data)} documents successfully uploaded.")
+
+        total_docs = len(pending_data) + len(drafted_data) + len(solved_data) + len(escalated_data)
+
+        print(f"""✅ Success: {total_docs} documents successfully uploaded.""")
     except Exception as e:
         print(f"❌ Error uploading data: {e}")
+
 
 if __name__ == "__main__":
     upload_data()
