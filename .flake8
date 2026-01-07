@@ -1,0 +1,8 @@
+[flake8]
+
+max-line-length = 100
+exclude=
+    .venv,
+    .git,
+    .ipynb_checkpoints,
+
