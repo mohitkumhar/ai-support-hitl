@@ -27,15 +27,12 @@ jobs:
       
       - name: Run Ruff Linting
         run: |
-          pip install ruff
           ruff check . --fix
       
       - name: Run Flake-8 Linting
         run: |
-          pip install flake8
           flake8 .
 
       - name: Run Pylint
         run: |
-          pip install pylint
-          pylint .
+          pylint *.py
