@@ -1,0 +1,15 @@
+[project]
+name = "ai-chatbot-with-memory-and-tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dotenv>=0.9.9",
+    "langchain-chroma>=1.1.0",
+    "langchain-openai>=1.1.6",
+    "pylint>=4.0.4",
+    "pymongo>=4.15.5",
+    "ruff>=0.14.10",
+    "streamlit>=1.52.2",
+]
