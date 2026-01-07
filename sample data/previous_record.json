@@ -1,0 +1,168 @@
+[
+  {
+    "ticket_id": "TKT_000001",
+    "issue": "Payment deducted but order was not placed",
+    "resolution": "Payment verified and refund initiated to original payment method within 3–5 business days",
+    "ticket_creation_time": "2024-10-12T09:14:22",
+    "ticket_closure_time": "2024-10-12T13:45:10",
+    "metadata": {
+      "category": "payment",
+      "priority": "high"
+    }
+  },
+  {
+    "ticket_id": "TKT_000002",
+    "issue": "Order marked delivered but customer did not receive it",
+    "resolution": "Delivery investigation opened and replacement order created",
+    "ticket_creation_time": "2024-10-10T16:05:44",
+    "ticket_closure_time": "2024-10-11T11:20:30",
+    "metadata": {
+      "category": "delivery",
+      "priority": "high"
+    }
+  },
+  {
+    "ticket_id": "TKT_000003",
+    "issue": "Refund not received even after 7 days",
+    "resolution": "Refund delay escalated to finance team and customer informed",
+    "ticket_creation_time": "2024-10-08T10:01:12",
+    "ticket_closure_time": "2024-10-09T14:40:55",
+    "metadata": {
+      "category": "refund",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000004",
+    "issue": "Wrong item delivered instead of ordered product",
+    "resolution": "Replacement order created and return pickup scheduled",
+    "ticket_creation_time": "2024-10-09T12:33:18",
+    "ticket_closure_time": "2024-10-09T18:10:41",
+    "metadata": {
+      "category": "order",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000005",
+    "issue": "Account locked due to multiple failed login attempts",
+    "resolution": "Account unlocked after identity verification and password reset link sent",
+    "ticket_creation_time": "2024-10-11T08:20:09",
+    "ticket_closure_time": "2024-10-11T09:45:02",
+    "metadata": {
+      "category": "account",
+      "priority": "high"
+    }
+  },
+  {
+    "ticket_id": "TKT_000006",
+    "issue": "Customer received an item with missing accessories",
+    "resolution": "Missing accessories shipped separately at no additional cost",
+    "ticket_creation_time": "2024-10-13T11:18:45",
+    "ticket_closure_time": "2024-10-13T17:02:10",
+    "metadata": {
+      "category": "product",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000007",
+    "issue": "Order automatically cancelled due to address verification failure",
+    "resolution": "Customer address confirmed and order successfully re-created",
+    "ticket_creation_time": "2024-10-14T09:42:30",
+    "ticket_closure_time": "2024-10-14T12:55:20",
+    "metadata": {
+      "category": "order",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000008",
+    "issue": "Customer charged delivery fee despite being eligible for free shipping",
+    "resolution": "Delivery charges refunded after eligibility verification",
+    "ticket_creation_time": "2024-10-15T14:06:11",
+    "ticket_closure_time": "2024-10-15T18:40:52",
+    "metadata": {
+      "category": "payment",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000009",
+    "issue": "Return pickup not attempted on scheduled date",
+    "resolution": "Return pickup rescheduled and customer notified",
+    "ticket_creation_time": "2024-10-16T10:22:55",
+    "ticket_closure_time": "2024-10-16T15:10:33",
+    "metadata": {
+      "category": "refund",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000010",
+    "issue": "Customer reported incorrect invoice amount",
+    "resolution": "Invoice corrected and updated invoice shared with customer",
+    "ticket_creation_time": "2024-10-17T13:47:08",
+    "ticket_closure_time": "2024-10-17T16:58:41",
+    "metadata": {
+      "category": "payment",
+      "priority": "low"
+    }
+  },
+  {
+    "ticket_id": "TKT_000011",
+    "issue": "Product delivered later than promised delivery date",
+    "resolution": "Delivery delay acknowledged and compensation credit issued",
+    "ticket_creation_time": "2024-10-18T08:35:19",
+    "ticket_closure_time": "2024-10-18T14:12:05",
+    "metadata": {
+      "category": "delivery",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000012",
+    "issue": "Customer unable to apply promotional coupon during checkout",
+    "resolution": "Coupon conditions explained and manual discount applied",
+    "ticket_creation_time": "2024-10-19T16:09:27",
+    "ticket_closure_time": "2024-10-19T19:45:54",
+    "metadata": {
+      "category": "order",
+      "priority": "low"
+    }
+  },
+  {
+    "ticket_id": "TKT_000013",
+    "issue": "Order returned but refund not initiated",
+    "resolution": "Return receipt confirmed and refund initiated",
+    "ticket_creation_time": "2024-10-20T09:51:40",
+    "ticket_closure_time": "2024-10-20T18:22:16",
+    "metadata": {
+      "category": "refund",
+      "priority": "medium"
+    }
+  },
+  {
+    "ticket_id": "TKT_000014",
+    "issue": "Customer account flagged for suspicious activity",
+    "resolution": "Account secured after verification and access restored",
+    "ticket_creation_time": "2024-10-21T07:58:03",
+    "ticket_closure_time": "2024-10-21T10:36:49",
+    "metadata": {
+      "category": "account",
+      "priority": "high"
+    }
+  },
+  {
+    "ticket_id": "TKT_000015",
+    "issue": "Customer received refurbished item instead of new",
+    "resolution": "Replacement with new item approved and return arranged",
+    "ticket_creation_time": "2024-10-22T15:14:26",
+    "ticket_closure_time": "2024-10-22T20:05:10",
+    "metadata": {
+      "category": "product",
+      "priority": "high"
+    }
+  }
+]
+
