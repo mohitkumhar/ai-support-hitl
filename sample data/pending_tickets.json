@@ -1,0 +1,62 @@
+[
+  {
+    "ticket_id": "TKT_000016",
+    "issue": "Refund initiated but amount still not credited to bank account",
+    "ticket_creation_time": "2024-10-23T11:08:42",
+    "metadata": { "category": "refund", "priority": "medium" }
+  },
+  {
+    "ticket_id": "TKT_000017",
+    "issue": "Order stuck in shipped status for more than 5 days",
+    "ticket_creation_time": "2024-10-24T09:32:15",
+    "metadata": { "category": "delivery", "priority": "high" }
+  },
+  {
+    "ticket_id": "TKT_000018",
+    "issue": "Customer unable to update delivery address after placing order",
+    "ticket_creation_time": "2024-10-24T17:45:09",
+    "metadata": { "category": "order", "priority": "medium" }
+  },
+  {
+    "ticket_id": "TKT_000019",
+    "issue": "Payment successful but order not visible in customer account",
+    "ticket_creation_time": "2024-10-25T10:12:56",
+    "metadata": { "category": "payment", "priority": "high" }
+  },
+  {
+    "ticket_id": "TKT_000020",
+    "issue": "Return pickup scheduled but no confirmation received",
+    "ticket_creation_time": "2024-10-26T13:40:22",
+    "metadata": { "category": "refund", "priority": "medium" }
+  },
+  {
+    "ticket_id": "TKT_000021",
+    "issue": "Customer received damaged product and submitted photos",
+    "ticket_creation_time": "2024-10-27T16:18:35",
+    "metadata": { "category": "product", "priority": "high" }
+  },
+  {
+    "ticket_id": "TKT_000022",
+    "issue": "Promotional cashback not applied after successful checkout",
+    "ticket_creation_time": "2024-10-28T08:54:11",
+    "metadata": { "category": "payment", "priority": "low" }
+  },
+  {
+    "ticket_id": "TKT_000023",
+    "issue": "Customer not receiving OTP for account login",
+    "ticket_creation_time": "2024-10-28T19:02:47",
+    "metadata": { "category": "account", "priority": "medium" }
+  },
+  {
+    "ticket_id": "TKT_000024",
+    "issue": "Order partially delivered, one item missing from package",
+    "ticket_creation_time": "2024-10-29T14:27:08",
+    "metadata": { "category": "delivery", "priority": "high" }
+  },
+  {
+    "ticket_id": "TKT_000025",
+    "issue": "Subscription auto-renewed without customer approval",
+    "ticket_creation_time": "2024-10-30T11:36:59",
+    "metadata": { "category": "account", "priority": "high" }
+  }
+]
