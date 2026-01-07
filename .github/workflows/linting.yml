@@ -27,12 +27,12 @@ jobs:
       
       - name: Run Ruff Linting
         run: |
-          uv ruff check . --fix
+          uv run ruff check . --fix
       
       - name: Run Flake-8 Linting
         run: |
-          uv flake8 .
+          uv run flake8 .
 
       - name: Run Pylint
         run: |
-          uv pylint *.py
+          uv run pylint *.py
