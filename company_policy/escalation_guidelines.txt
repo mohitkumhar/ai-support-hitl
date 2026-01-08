@@ -1,0 +1,8 @@
+Escalation Guidelines
+
+The following issues must not be auto-resolved and require human review or manager escalation:
+- Payment failures
+- Unauthorized transactions
+- Legal or compliance-related complaints
+- High-severity delivery disputes
+- Tickets containing angry, abusive, or threatening language

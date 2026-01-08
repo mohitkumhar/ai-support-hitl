@@ -1,0 +1,5 @@
+Ticket Closure Rules
+
+1. Tickets should be closed only after a clear resolution has been provided and communicated to the customer.
+2. If follow-up action is required, the ticket must remain open until completion.
+3. Every closed ticket must include a clear and concise resolution note for audit purposes.

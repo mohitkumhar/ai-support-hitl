@@ -1,0 +1,6 @@
+Communication Guidelines
+
+1. All communication with customers must remain polite, professional, and clear.
+2. Do not guarantee outcomes that depend on third-party verification or external services.
+3. Avoid sharing internal workflows, internal timelines, or operational details.
+4. Never ask customers for sensitive information such as OTPs, passwords, or card details.
