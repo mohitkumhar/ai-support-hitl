@@ -1,0 +1,6 @@
+Account and Security Policy
+
+1. Accounts may be temporarily locked after multiple failed login attempts.
+2. Suspicious or unauthorized activity requires immediate identity verification and a mandatory password reset.
+3. Unauthorized orders must always be escalated for manual review.
+4. No account-level changes should be made without proper customer identity confirmation.

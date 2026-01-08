@@ -1,0 +1,87 @@
+Customer Support Policies
+Applies to all orders placed on the platform
+Last updated: December 2026
+
+
+1. Refund Policy
+
+1. Refunds are issued only after verifying the order status and payment confirmation.
+2. If an item is damaged, defective, or incorrect, the customer is eligible for either a full refund or a replacement, based on availability.
+3. Refunds are always processed to the original payment method used at checkout.
+4. Once approved, refunds usually reflect within:
+   - 3 to 5 business days for UPI, wallets, and debit/credit cards
+   - 5 to 7 business days for net banking transactions
+5. If a refund is delayed beyond the stated timeline, the ticket must be escalated to the finance team for manual verification.
+
+Non-refundable cases:
+- Items marked as non-returnable
+- Orders cancelled after shipment unless the item is damaged, defective, or incorrect
+
+
+2. Payment Issues Policy
+
+1. If payment is deducted but the order is not confirmed, the deducted amount is automatically refunded.
+2. In the case of duplicate or double payment, only the excess amount is refunded.
+3. EMI or bank-side payment failures may require the customer to contact their bank after verification from the platform.
+4. All payment-related issues must be treated as high-priority tickets.
+5. No payment-related ticket should be auto-closed without confirmation of resolution.
+
+
+3. Delivery and Shipping Policy
+
+1. Standard delivery timelines range between 3 to 7 days, depending on the customer’s location.
+2. If an order is marked as delivered but the customer has not received it:
+   - A delivery investigation must be initiated
+   - Resolution may include a replacement or a refund
+3. Delivery delays caused by logistics partners may qualify for partial refunds or delivery credits at the platform’s discretion.
+4. If an incorrect item is delivered, the customer is eligible for a free replacement with return pickup.
+
+
+4. Cancellation Policy
+
+1. Orders can be cancelled before shipment without any penalty.
+2. Orders cancelled after shipment are generally not eligible for cancellation unless:
+   - The item is damaged
+   - The wrong item was delivered
+3. Refunds for cancelled orders follow the standard refund processing timeline.
+
+
+5. Return Policy
+
+1. Returns are accepted within 7 to 10 days of delivery unless otherwise specified on the product page.
+2. Items must be unused, undamaged, and returned in original packaging.
+3. Return pickup is subject to service availability at the customer’s address.
+4. After the returned item is received and verified, a refund or replacement is processed accordingly.
+
+
+6. Account and Security Policy
+
+1. Accounts may be temporarily locked after multiple failed login attempts.
+2. Suspicious or unauthorized activity requires immediate identity verification and a mandatory password reset.
+3. Unauthorized orders must always be escalated for manual review.
+4. No account-level changes should be made without proper customer identity confirmation.
+
+
+7. Escalation Guidelines
+
+The following issues must not be auto-resolved and require human review or manager escalation:
+- Payment failures
+- Unauthorized transactions
+- Legal or compliance-related complaints
+- High-severity delivery disputes
+- Tickets containing angry, abusive, or threatening language
+
+
+8. Communication Guidelines
+
+1. All communication with customers must remain polite, professional, and clear.
+2. Do not guarantee outcomes that depend on third-party verification or external services.
+3. Avoid sharing internal workflows, internal timelines, or operational details.
+4. Never ask customers for sensitive information such as OTPs, passwords, or card details.
+
+
+9. Ticket Closure Rules
+
+1. Tickets should be closed only after a clear resolution has been provided and communicated to the customer.
+2. If follow-up action is required, the ticket must remain open until completion.
+3. Every closed ticket must include a clear and concise resolution note for audit purposes.

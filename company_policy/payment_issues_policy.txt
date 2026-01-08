@@ -1,0 +1,7 @@
+Payment Issues Policy
+
+1. If payment is deducted but the order is not confirmed, the deducted amount is automatically refunded.
+2. In the case of duplicate or double payment, only the excess amount is refunded.
+3. EMI or bank-side payment failures may require the customer to contact their bank after verification from the platform.
+4. All payment-related issues must be treated as high-priority tickets.
+5. No payment-related ticket should be auto-closed without confirmation of resolution.
