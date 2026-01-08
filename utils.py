@@ -22,10 +22,12 @@ load_dotenv()
 
 OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
+
 def connect_mongo_db(
-        collection_name: str,
-        database_name: str = 'ai_support_system'
-    ) -> Collection:
+            collection_name: str,
+            database_name: str = 'ai_support_system'
+        ) -> Collection:
+
     """Function to connect with MongoDB and return the collection object.
 
     Args:
@@ -41,14 +43,15 @@ def connect_mongo_db(
 
     return collection
 
+
 # creating LLM Model Object
 def get_llm_object(
-        open_ai_key: str,
-        model_name: str='openai/gpt-4o-mini',
-        base_url: str="https://openrouter.ai/api/v1",
-        temperature: float=0.2,
-        verbose: bool=True
-    ) -> ChatOpenAI:
+            open_ai_key: str,
+            model_name: str = 'openai/gpt-4o-mini',
+            base_url: str = "https://openrouter.ai/api/v1",
+            temperature: float = 0.2,
+            verbose: bool = True
+        ) -> ChatOpenAI:
     """Function to create the LLM object
 
     Args:
@@ -74,8 +77,8 @@ def get_llm_object(
 
 # creating embedding model object
 def get_embedding_model(
-        open_ai_key: str
-    ) -> OpenAIEmbeddings:
+            open_ai_key: str
+        ) -> OpenAIEmbeddings:
     """Function to create OpenAI Embeddings Object
 
     Args:
@@ -96,8 +99,8 @@ def get_embedding_model(
 # connecting to vector DB Chroma
 
 def connect_policy_vectordb(
-        open_ai_key: str
-    ) -> Chroma:
+            open_ai_key: str
+        ) -> Chroma:
     """Function to connect to vectorDB
 
     Args:
@@ -115,7 +118,9 @@ def connect_policy_vectordb(
     return policy_vector_db
 
 
-def connect_previous_record_vector_db(open_ai_key: str) -> Chroma:
+def connect_previous_record_vector_db(
+            open_ai_key: str
+        ) -> Chroma:
     """Function to connect to Previous Records VectorDB
 
     Args:
@@ -133,9 +138,10 @@ def connect_previous_record_vector_db(open_ai_key: str) -> Chroma:
 
     return previous_record_vector_db
 
+
 def fetch_confidence_score(
-        issue: str
-    ) -> float:
+            issue: str
+        ) -> float:
     """Fetch Confidence Score from the given issue
 
     Args:
@@ -156,9 +162,9 @@ def fetch_confidence_score(
 
 
 def connect_vector_db(
-        collection_name: str,
-        open_ai_key: str
-    ) -> Chroma:
+            collection_name: str,
+            open_ai_key: str
+        ) -> Chroma:
     """Function to Connect VectorDB
 
     Args:
@@ -182,10 +188,11 @@ def connect_vector_db(
 
     return vector_db
 
+
 def fetch_similar_past_tickets(
-        issue: str,
-        open_ai_key: str
-    ) -> List[str]:
+            issue: str,
+            open_ai_key: str
+        ) -> List[str]:
     """Function to fetch similar past tickets from VectorDB
 
     Args:
@@ -203,9 +210,9 @@ def fetch_similar_past_tickets(
 
 
 def fetch_similar_policy(
-        issue: str,
-        open_ai_key: str
-    ) -> List[str]:
+            issue: str,
+            open_ai_key: str
+        ) -> List[str]:
     """Fetch Similar Policy based on User Query
 
     Args:
@@ -223,8 +230,8 @@ def fetch_similar_policy(
 
 
 def fetch_ai_drafted_document(
-        ticket_id: str
-    ) -> pymongo.cursor.Cursor:
+            ticket_id: str
+        ) -> pymongo.cursor.Cursor:
     """ Fetch AI Drafted Document from MongoDB
 
     Args:
@@ -239,8 +246,8 @@ def fetch_ai_drafted_document(
 
 
 def fetch_ticket_response_and_confidence(
-        ticket_id: str
-    ) -> tuple:
+            ticket_id: str
+        ) -> tuple:
     """ Get Ticket Response and Confidence from MongoDB
 
     Args:
@@ -259,7 +266,9 @@ def fetch_ticket_response_and_confidence(
         return ai_drafted_response, ai_drafted_response_confidence
 
 
-def remove_drafted_ticket_from_db(ticket_id: str) -> bool:
+def remove_drafted_ticket_from_db(
+            ticket_id: str
+        ) -> bool:
     """Remove Drafted Ticket from MongoDB
 
     Args:
@@ -278,7 +287,10 @@ def remove_drafted_ticket_from_db(ticket_id: str) -> bool:
         return False
 
 
-def move_escalated_ticket_to_completed_in_db(ticket_id: str, response: str):
+def move_escalated_ticket_to_completed_in_db(
+            ticket_id: str,
+            response: str
+        ) -> bool:
     """Move Escalated Ticket to Completed Ticket Collection in DataBase
 
     Args:
@@ -289,11 +301,9 @@ def move_escalated_ticket_to_completed_in_db(ticket_id: str, response: str):
         _type_: bool: True if the ticket is moved successfully
     """
 
-
     try:
         escalated_tickets_collection = connect_mongo_db(collection_name="escalated_tickets")
         completed_tickets_collection = connect_mongo_db(collection_name="solved_tickets")
-
 
         ticket_to_move = escalated_tickets_collection.find_one_and_delete({"ticket_id": ticket_id})
         ticket_to_move.pop('_id', None)
@@ -303,12 +313,12 @@ def move_escalated_ticket_to_completed_in_db(ticket_id: str, response: str):
             'ticket_id': ticket_id,
             'issue': ticket_to_move['issue'],
             "resolution": response,
-            "ai_drafted_response": 
+            "ai_drafted_response":
                 ticket_to_move.get('ai_drafted_response', "Senior agent handled the response"),
             "used_policy": ticket_to_move.get('used_policy', None),
             "used_reference_ticket_id": ticket_to_move.get('used_reference_ticket_id', None),
             'confidence': ticket_to_move.get('confidence', "Senior agent handled the response"),
-            'metadata': 
+            'metadata':
                 {
                     'ticket_creation_time': ticket_to_move['metadata']['ticket_creation_time'],
                     'ticket_closure_time': datetime.datetime.now(),
@@ -326,11 +336,13 @@ def move_escalated_ticket_to_completed_in_db(ticket_id: str, response: str):
         return False
 
 
-def move_pending_ticket_to_completed_in_db(ticket_id: str, response: str) -> bool:
-
+def move_pending_ticket_to_completed_in_db(
+            ticket_id: str,
+            response: str
+        ) -> bool:
     """
     Move Pending Tickets to Complete Tickets Collection in MongoDB:
-    
+
     Args:
         ticket_id (str): Ticket ID
         response (str): Resolution Response
@@ -365,7 +377,7 @@ def move_pending_ticket_to_completed_in_db(ticket_id: str, response: str) -> boo
             "resolution": response,
             "ai_drafted_response": ai_drafted_response,
             'confidence': confidence,
-            'metadata': 
+            'metadata':
                 {
                     'ticket_creation_time': ticket_to_move['metadata']['ticket_creation_time'],
                     'ticket_closure_time': datetime.datetime.now(),
@@ -383,7 +395,10 @@ def move_pending_ticket_to_completed_in_db(ticket_id: str, response: str) -> boo
         return False
 
 
-def move_drafted_ticket_to_completed_in_db(ticket_id: str, response: str) -> bool:
+def move_drafted_ticket_to_completed_in_db(
+            ticket_id: str,
+            response: str
+        ) -> bool:
     """Move Drafted Ticket from to Completed Tickets in Database
 
     Args:
@@ -398,7 +413,6 @@ def move_drafted_ticket_to_completed_in_db(ticket_id: str, response: str) -> boo
         drafted_ticket_collection = connect_mongo_db(collection_name="ai_pending_drafted_tickets")
         completed_tickets_collection = connect_mongo_db(collection_name="solved_tickets")
 
-
         ticket_to_move = drafted_ticket_collection.find_one_and_delete({"ticket_id": ticket_id})
         print(ticket_to_move)
         ticket_to_move.pop('_id', None)
@@ -412,7 +426,7 @@ def move_drafted_ticket_to_completed_in_db(ticket_id: str, response: str) -> boo
             "used_policy": ticket_to_move['used_policy'],
             "used_reference_ticket_id": ticket_to_move['used_reference_ticket_id'],
             'confidence': ticket_to_move['confidence'],
-            'metadata': 
+            'metadata':
                 {
                     'ticket_creation_time': ticket_to_move['metadata']['ticket_creation_time'],
                     'ticket_closure_time': datetime.datetime.now(),
@@ -430,8 +444,10 @@ def move_drafted_ticket_to_completed_in_db(ticket_id: str, response: str) -> boo
         return False
 
 
-
-def call_llm_to_rephase(current_text: str, temperature: float) -> str:
+def call_llm_to_rephase(
+            current_text: str,
+            temperature: float
+        ) -> str:
     """
     Rephase the given text to make it more polite and professional.
 
@@ -444,12 +460,12 @@ def call_llm_to_rephase(current_text: str, temperature: float) -> str:
     """
 
     prompt_template = PromptTemplate(
-        template = """
+        template="""
         Your task is to rephase the given text to make it more polite and professional.
         Please ensure that the meaning of the text remains unchanged.
         Text: {current_text}
         """,
-        input_variables = ['current_text'],
+        input_variables=['current_text'],
     )
 
     llm = get_llm_object(
@@ -469,14 +485,17 @@ def call_llm_to_rephase(current_text: str, temperature: float) -> str:
     return final_chain.invoke(current_text)
 
 
-def move_tickets_to_escalated_tickets_in_db(ticket_id: str, from_collection_name: str) -> bool:
+def move_tickets_to_escalated_tickets_in_db(
+            ticket_id: str,
+            from_collection_name: str
+        ) -> bool:
     """
     Move Tickets to Escalated Tickets Collection in Database
 
     Args:
         ticket_id (str): Ticket ID
         from_collection_name (str): Name of the collection from which the ticket is to be moved
-    
+
     Returns:
         _type_: bool: True if the ticket is moved successfully, False otherwise
     """
