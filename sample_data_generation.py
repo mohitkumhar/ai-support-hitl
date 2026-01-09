@@ -2,12 +2,17 @@
     This is the Sample ticket data generation file, for testing purposes.
 """
 
+import os
 import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # 1. Setup MongoDB Connection
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client["ai_support_system"]
 
 # Collection definitions
