@@ -22,7 +22,7 @@ jobs:
               id: version
               run: |
                 VERSION=$(cat application_version.txt)
-                echo "VERSION=$VERSION"
+                echo "VERSION=$VERSION" >> $GITHUB_ENV
               shell: bash
 
             - name: Log in to Docker
@@ -34,7 +34,7 @@ jobs:
             - name: Build and Push Docker Image
               run: |
                 IMAGE=mohitkumhar/ai-support-hitl
-                TAG=$VERSION
+                TAG=${{ secrets.VERSION }}
                 docker build -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
 
