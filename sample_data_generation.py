@@ -2,10 +2,10 @@
     This is the Sample ticket data generation file, for testing purposes.
 """
 
+import os
 import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
