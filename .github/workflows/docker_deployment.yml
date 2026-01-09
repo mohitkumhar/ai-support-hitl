@@ -34,7 +34,7 @@ jobs:
             - name: Build and Push Docker Image
               run: |
                 IMAGE=mohitkumhar/ai-support-hitl
-                TAG=${{ secrets.VERSION }}
+                TAG=${{ env.VERSION }}
                 docker build -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
 
@@ -42,3 +42,5 @@ jobs:
                 docker push $IMAGE:latest
 
               shell: bash
+
+
