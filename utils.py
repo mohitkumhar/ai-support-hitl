@@ -37,7 +37,7 @@ def connect_mongo_db(
     Returns:
         _type_: Collection: MongoDB Collection Object
     """
-    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
     db = client[database_name]
     collection = db[collection_name]
 
@@ -175,7 +175,7 @@ def connect_vector_db(
         _type_: Chroma: VectorDB Object
     """
     embeddings = OpenAIEmbeddings(
-        open_ai_key=open_ai_key,
+        api_key=open_ai_key,
         model="text-embedding-3-large",
         base_url="https://openrouter.ai/api/v1",
     )
