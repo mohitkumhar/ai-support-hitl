@@ -28,7 +28,7 @@ load_dotenv()
 OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
 #  connecting to DB
-client = pymongo.MongoClient("mongodb://localhost:27017/")
+client = pymongo.MongoClient(os.getenv("MONGO_URI"))
 db = client["ai_support_system"]
 
 pending_tickets_collection = db["pending_tickets"]
