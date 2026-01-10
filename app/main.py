@@ -448,7 +448,7 @@ def main():
                 st.error(f"{score} - Low confidence (Manual review recommended)")
 
             st.subheader("✏️ Response Draft")
-            ai_draft_response = current_ticket['ai_drafted_response']
+            # ai_draft_response = current_ticket['ai_drafted_response']
             ai_draft = current_ticket.get(
                 "ai_drafted_response",
                 "AI unable to Draft it, Write Your own..."

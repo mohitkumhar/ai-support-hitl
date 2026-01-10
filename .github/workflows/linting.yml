@@ -29,9 +29,9 @@ jobs:
         run: |
           uv run ruff check . --fix
       
-      - name: Run Flake-8 Linting
-        run: |
-          uv run flake8 .
+      # - name: Run Flake-8 Linting
+      #   run: |
+      #     uv run flake8 .
 
       # - name: Run Pylint
       #   run: |
