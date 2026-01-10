@@ -35,10 +35,10 @@ jobs:
               run: |
                 IMAGE=mohitkumhar/ai-support-hitl
                 TAG=${{ env.VERSION }}
-                docker build -t $IMAGE:$TAG .
+                docker build -f docker/Dockerfile -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
 
-                docker build -t $IMAGE:latest .
+                docker build -f docker/Dockerfile -t $IMAGE:latest .
                 docker push $IMAGE:latest
 
               shell: bash
