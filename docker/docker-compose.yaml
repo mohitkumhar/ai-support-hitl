@@ -2,13 +2,19 @@ version: "3.9"
 
 services:
   hitl:
-    image: mohitkumhar/ai-support-hitl:latest
+    # image: mohitkumhar/ai-support-hitl:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: ai-support-hitl
     ports:
       - "8080:8501"
     env_file:
       - ../.env
     restart: unless-stopped
+    depends_on:
+      - mongo
+      - mongo-express
 
 
   mongo:

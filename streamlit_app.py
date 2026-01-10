@@ -1,6 +1,12 @@
+import streamlit as st
 from app.main import main
 from scripts.sample_data_generation import upload_data
 
-if __name__ == "__main__":
+
+@st.cache_resource
+def init_data():
     upload_data()
-    main()
+
+
+init_data()
+main()
