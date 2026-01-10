@@ -7,5 +7,6 @@ from scripts.sample_data_generation import upload_data
 def init_data():
     upload_data()
 
+
 init_data()
 main()
