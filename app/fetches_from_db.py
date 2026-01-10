@@ -16,7 +16,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from response_drafting_utils import ResponseDraftingOutput
-from utils import (
+from app.utils import (
         get_embedding_model,
         connect_policy_vectordb,
         connect_previous_record_vector_db,

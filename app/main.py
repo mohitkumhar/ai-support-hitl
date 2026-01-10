@@ -11,7 +11,7 @@ import pymongo
 
 from dotenv import load_dotenv
 
-from utils import (
+from app.utils import (
     fetch_similar_past_tickets,
     fetch_similar_policy,
     move_pending_ticket_to_completed_in_db,
