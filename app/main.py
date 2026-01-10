@@ -236,7 +236,7 @@ elif app_mode == "Escalated":
 # --- COMPLETED SECTION ---
 elif app_mode == "Completed":
     st.sidebar.subheader("🎫 Completed Tickets")
-    completed_tickets = get_completed_tickets(st.session_state.get("escalated_ticekts_limit", 10))
+    completed_tickets = get_completed_tickets(st.session_state.get("completed_tickets_limit", 10))
     if completed_tickets:
         completed_ticket_id = st.sidebar.selectbox(
             "Select a past completed ticket:",
@@ -247,8 +247,8 @@ elif app_mode == "Completed":
         current_completed_ticket = completed_map.get(completed_ticket_id)
 
         if st.sidebar.button("Load more Escalated Tickets"):
-            st.session_state.escalated_tickets_limit = st.session_state.get(
-                    "escalated_tickets_limit", 10
+            st.session_state.completed_tickets_limit = st.session_state.get(
+                    "completed_tickets_limit", 10
                 ) + 10
             st.rerun()
 
