@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:8501"
     env_file:
-      - .env
+      - ../.env
     restart: unless-stopped
 
 
