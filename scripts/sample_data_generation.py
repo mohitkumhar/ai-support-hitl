@@ -12,7 +12,8 @@ load_dotenv()
 
 
 # 1. Setup MongoDB Connection
-client = MongoClient(os.getenv("MONGO_URI"))
+# client = MongoClient(os.getenv("MONGO_URI"))
+client = MongoClient("mongodb://localhost:27017/")
 db = client["ai_support_system"]
 
 # Collection definitions
