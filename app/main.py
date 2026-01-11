@@ -6,6 +6,7 @@ and manage support tickets with AI assistance.
 """
 
 import os
+import datetime
 import streamlit as st
 import pymongo
 
@@ -48,6 +49,13 @@ def main():
         st.error("Critical Error: Unable to connect to the database.")
         st.stop()
 
+    def check_ticket_exists(ticket_id: str) -> bool:
+        """Check if ticket_id exists in any collection."""
+        if pending_tickets_collection.find_one({"ticket_id": ticket_id}): return True
+        if pending_drafted_ticket_collection.find_one({"ticket_id": ticket_id}): return True
+        if escalated_tickets_collection.find_one({"ticket_id": ticket_id}): return True
+        if solved_tickets_collection.find_one({"ticket_id": ticket_id}): return True
+        return False
 
     logger.info("Setting up Streamlit page configuration...")
     # --- PAGE CONFIG ---
@@ -192,7 +200,7 @@ def main():
     st.sidebar.title("🛠️ Dashboard Control")
     # This selector solves the logic conflict by letting you choose which mode to activate
     # app_mode = st.sidebar.radio("Select View:", ["Pending", "Drafted", "Escalated", "Completed"])
-    app_mode = st.sidebar.radio("Select View:", ["Escalated", "Pending", "Drafted", "Completed"])
+    app_mode = st.sidebar.radio("Select View:", ["Escalated", "Pending", "Drafted", "Completed", "Raise Ticket"])
     logger.info(f"Sidebar view selected: {app_mode}")
     st.sidebar.divider()
 
@@ -317,13 +325,19 @@ def main():
             logger.info("No completed tickets found")
             st.sidebar.info("No completed tickets found.")
 
+    elif app_mode == "Raise Ticket":
+        st.sidebar.info("Fill the form to raise a new ticket.")
+
 
     # --- MAIN INTERFACE ---
     st.title("🚀 AI Support Agent Dashboard")
     st.divider()
 
     # Priority: Pending ticket view
-    if current_pending_ticket:
+    if app_mode == "Raise Ticket":
+        MODE = "raise_ticket"
+        current_ticket = None
+    elif current_pending_ticket:
         logger.info(f"Selected Pending Ticket: {current_pending_ticket['ticket_id']}")
         MODE = "pending"
         current_ticket = current_pending_ticket
@@ -756,6 +770,89 @@ def main():
 
         st.info("Completed tickets are only for read-only purposes.")
 
+    elif MODE == "raise_ticket":
+        st.subheader("📝 Raise New Ticket")
+        
+        target_collection = st.selectbox(
+            "Where to store the ticket?",
+            ["Pending", "Drafted", "Escalated", "Completed"]
+        )
+
+        with st.form("raise_ticket_form"):
+            c1, c2 = st.columns(2)
+            with c1:
+                ticket_id = st.text_input("Ticket ID", placeholder="e.g. TKT_0099")
+                category = st.selectbox("Category", ["Technical", "Billing", "Hardware", "Security", "Other"])
+            with c2:
+                priority = st.selectbox("Priority", ["low", "medium", "high", "critical"])
+            
+            issue = st.text_area("Issue Description", placeholder="Describe the customer issue...")
+
+            # Dynamic fields
+            ai_response = ""
+            confidence = 0.8
+            tone = "Professional"
+            escalation_reason = ""
+            resolution = ""
+
+            if target_collection == "Drafted":
+                st.markdown("---")
+                st.write("**Draft Details**")
+                ai_response = st.text_area("Drafted Response")
+                confidence = st.slider("Confidence", 0.0, 1.0, 0.8)
+                tone = st.selectbox("Tone", ["Professional", "Helpful", "Apologetic"])
+            
+            elif target_collection == "Escalated":
+                st.markdown("---")
+                st.write("**Escalation Details**")
+                escalation_reason = st.text_input("Escalation Reason")
+            
+            elif target_collection == "Completed":
+                st.markdown("---")
+                st.write("**Resolution Details**")
+                resolution = st.text_area("Resolution")
+
+            submitted = st.form_submit_button("Submit Ticket")
+
+            if submitted:
+                if not ticket_id or not issue:
+                    st.error("Ticket ID and Issue are required.")
+                elif check_ticket_exists(ticket_id):
+                    st.error(f"Ticket ID {ticket_id} already exists.")
+                else:
+                    # Base Schema
+                    doc = {
+                        "ticket_id": ticket_id,
+                        "issue": issue,
+                        "metadata": {
+                            "ticket_creation_time": datetime.datetime.now(),
+                            "category": category,
+                            "priority": priority,
+                            "is_drafted": (target_collection == "Drafted")
+                        }
+                    }
+
+                    try:
+                        if target_collection == "Pending":
+                            doc["used_policy"] = None
+                            pending_tickets_collection.insert_one(doc)
+                        elif target_collection == "Drafted":
+                            doc.update({"ai_drafted_response": ai_response, "confidence": confidence, "used_policy": "Manual", "used_reference_ticket_id": "N/A"})
+                            doc["metadata"]["tone"] = tone
+                            pending_drafted_ticket_collection.insert_one(doc)
+                        elif target_collection == "Escalated":
+                            doc.update({"ai_drafted_response": "Manual Escalation", "confidence": 1.0, "used_policy": "Escalation Protocol", "used_reference_ticket_id": "N/A"})
+                            doc["metadata"]["escalation_reason"] = escalation_reason
+                            escalated_tickets_collection.insert_one(doc)
+                        elif target_collection == "Completed":
+                            doc.update({"resolution": resolution, "ai_drafted_response": "Manual Resolution", "confidence": 1.0, "used_policy": "N/A", "used_reference_ticket_id": "N/A"})
+                            doc["metadata"]["ticket_closure_time"] = datetime.datetime.now()
+                            solved_tickets_collection.insert_one(doc)
+                        
+                        st.success(f"Ticket {ticket_id} raised successfully in {target_collection}!")
+                    except Exception as e:
+                        logger.error(f"Error raising ticket: {e}")
+                        st.error("Failed to raise ticket.")
 
     # --- FOOTER: SYSTEM FEEDBACK ---
     st.divider()
