@@ -11,6 +11,8 @@ import pymongo
 
 from dotenv import load_dotenv
 
+from app.logger import logger
+
 from app.utils import (
     fetch_similar_past_tickets,
     fetch_similar_policy,
@@ -24,23 +26,30 @@ from app.utils import (
 
 
 def main():
+    
+    logger.info("Loading Environmental Variables...")
 
     load_dotenv()
 
-
-
     OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
+    logger.info("Connecting to MongoDB...")
+    try:
+        client = pymongo.MongoClient(os.getenv("MONGO_URI"))
 
-    db = client["ai_support_system"]
+        db = client["ai_support_system"]
 
-    solved_tickets_collection = db["solved_tickets"]
-    pending_tickets_collection = db["pending_tickets"]
-    pending_drafted_ticket_collection = db['ai_pending_drafted_tickets']
-    escalated_tickets_collection = connect_mongo_db("escalated_tickets")
+        solved_tickets_collection = db["solved_tickets"]
+        pending_tickets_collection = db["pending_tickets"]
+        pending_drafted_ticket_collection = db['ai_pending_drafted_tickets']
+        escalated_tickets_collection = connect_mongo_db("escalated_tickets")
+    except Exception as e:
+        logger.critical(f"Error connecting to Database: {e}")
+        st.error("Critical Error: Unable to connect to the database.")
+        st.stop()
 
 
+    logger.info("Setting up Streamlit page configuration...")
     # --- PAGE CONFIG ---
     st.set_page_config(page_title="AI Support Co-Pilot", layout="wide")
 
@@ -56,10 +65,17 @@ def main():
         Returns:
             list: list of pending tickets
         """
-        fetch_pending_tickets = list(
-            pending_tickets_collection.find({}).sort({"created_at": -1}).limit(limit)
-        )
-        return fetch_pending_tickets
+        try:
+            logger.info(f"Fetching pending tickets with limit: {limit}")
+            fetch_pending_tickets = list(
+                pending_tickets_collection.find({}).sort({"created_at": -1}).limit(limit)
+            )
+            logger.info(f"Fetched {len(fetch_pending_tickets)} pending tickets")
+            return fetch_pending_tickets
+        except Exception as e:
+            logger.error(f"Error fetching pending tickets: {e}")
+            st.error("Failed to load pending tickets.")
+            return []
 
 
     def handle_rephase_using_ai_click(current_text: str, temperature: float, purpose: str) -> None:
@@ -74,14 +90,19 @@ def main():
         Returs:
             None
         """
-        rephased_text = call_llm_to_rephase(current_text=current_text, temperature=temperature)
+        logger.info(f"Rephasing text for {purpose} ticket with temperature {temperature}")
+        try:
+            rephased_text = call_llm_to_rephase(current_text=current_text, temperature=temperature)
+            logger.info("Text rephasing successful")
 
-        if purpose == "pending":
-            st.session_state.pending_draft = rephased_text
-        if purpose == "drafted":
-            st.session_state.drafted_draft = rephased_text
-        if purpose == "escalated":
-            st.session_state.escalated_draft = rephased_text
+            if purpose == "pending":
+                st.session_state.pending_draft = rephased_text
+            if purpose == "drafted":
+                st.session_state.drafted_draft = rephased_text
+            if purpose == "escalated":
+                st.session_state.escalated_draft = rephased_text
+        except Exception as e:
+            logger.error(f"Error rephasing text: {e}")
 
 
     def get_drafted_tickets(limit: int = 10) -> list:
@@ -95,10 +116,17 @@ def main():
             list: List of drafted tickets
         """
 
-        pending_drafted_tickets = list(
-            pending_drafted_ticket_collection.find({}).sort({"created_at": -1}).limit(limit)
-        )
-        return pending_drafted_tickets
+        try:
+            logger.info(f"Fetching drafted tickets with limit: {limit}")
+            pending_drafted_tickets = list(
+                pending_drafted_ticket_collection.find({}).sort({"created_at": -1}).limit(limit)
+            )
+            logger.info(f"Fetched {len(pending_drafted_tickets)} drafted tickets")
+            return pending_drafted_tickets
+        except Exception as e:
+            logger.error(f"Error fetching drafted tickets: {e}")
+            st.error("Failed to load drafted tickets.")
+            return []
 
 
     def get_escalated_tickets(limit: int = 10) -> list:
@@ -112,10 +140,17 @@ def main():
             list: list of escalated tickets
         """
 
-        fetched_escalated_tickets = list(
-            escalated_tickets_collection.find({}).sort({"created_at": -1}).limit(limit)
-        )
-        return fetched_escalated_tickets
+        try:
+            logger.info(f"Fetching escalated tickets with limit: {limit}")
+            fetched_escalated_tickets = list(
+                escalated_tickets_collection.find({}).sort({"created_at": -1}).limit(limit)
+            )
+            logger.info(f"Fetched {len(fetched_escalated_tickets)} escalated tickets")
+            return fetched_escalated_tickets
+        except Exception as e:
+            logger.error(f"Error fetching escalated tickets: {e}")
+            st.error("Failed to load escalated tickets.")
+            return []
 
 
     def get_completed_tickets(limit: int = 10) -> list:
@@ -129,8 +164,15 @@ def main():
             list: list of completed tickets
         """
 
-        solved_tickets = list(solved_tickets_collection.find({}).sort({"created_at": -1}).limit(limit))
-        return solved_tickets
+        try:
+            logger.info(f"Fetching completed tickets with limit: {limit}")
+            solved_tickets = list(solved_tickets_collection.find({}).sort({"created_at": -1}).limit(limit))
+            logger.info(f"Fetched {len(solved_tickets)} completed tickets")
+            return solved_tickets
+        except Exception as e:
+            logger.error(f"Error fetching completed tickets: {e}")
+            st.error("Failed to load completed tickets.")
+            return []
 
 
     # --- UI STYLING ---
@@ -144,12 +186,14 @@ def main():
 
 
     # --- SIDEBAR ---
-    # --- SIDEBAR ---
+    
+    logger.info("Setting up AI-Support Dashboard...")
 
     st.sidebar.title("🛠️ Dashboard Control")
     # This selector solves the logic conflict by letting you choose which mode to activate
     # app_mode = st.sidebar.radio("Select View:", ["Pending", "Drafted", "Escalated", "Completed"])
     app_mode = st.sidebar.radio("Select View:", ["Escalated", "Pending", "Drafted", "Completed"])
+    logger.info(f"Sidebar view selected: {app_mode}")
     st.sidebar.divider()
 
     # Initialize all variables to None to prevent logic overlap
@@ -159,6 +203,7 @@ def main():
     current_completed_ticket = None
 
     # --- PENDING SECTION ---
+    logger.info("Loading tickets based on selected view...")
     if app_mode == "Pending":
         st.sidebar.subheader("🎫 Pending Reviews")
         pending_tickets = get_pending_tickets(st.session_state.get("pending_tickets_limit", 10))
@@ -172,6 +217,7 @@ def main():
             current_pending_ticket = pending_map.get(pending_ticket_id)
 
             if st.sidebar.button("Load more Pending Tickets"):
+                logger.info("Loading more pending tickets")
                 st.session_state.pending_tickets_limit = st.session_state.get(
                         "pending_tickets_limit", 10
                     ) + 10
@@ -180,6 +226,7 @@ def main():
             st.sidebar.caption(f"Showing {len(pending_tickets)} of {total_tickets_in_db} tickets")
 
         else:
+            logger.info("No pending tickets found")
             st.sidebar.info("No pending tickets found.")
 
 
@@ -197,6 +244,7 @@ def main():
             current_drafted_ticket = drafted_map.get(drafted_ticket_id)
 
             if st.sidebar.button("Load more Drafted Tickets"):
+                logger.info("Loading more drafted tickets")
                 st.session_state.drafted_tickets_limit = st.session_state.get(
                         "drafted_tickets_limit", 10
                     ) + 10
@@ -208,6 +256,7 @@ def main():
             )
 
         else:
+            logger.info("No drafted tickets found")
             st.sidebar.info("No drafted tickets found.")
 
     # --- ESCALATION SECTION ---
@@ -224,6 +273,7 @@ def main():
             current_escalated_ticket = escalated_map.get(escalated_ticket_id)
 
             if st.sidebar.button("Load more Escalated Tickets"):
+                logger.info("Loading more escalated tickets")
                 st.session_state.escalated_tickets_limit = st.session_state.get(
                         "escalated_tickets_limit", 10
                     ) + 10
@@ -235,6 +285,7 @@ def main():
             )
 
         else:
+            logger.info("No Escalated tickets found")
             st.sidebar.info("No Escalated tickets found.")
 
     # --- COMPLETED SECTION ---
@@ -251,6 +302,7 @@ def main():
             current_completed_ticket = completed_map.get(completed_ticket_id)
 
             if st.sidebar.button("Load more Escalated Tickets"):
+                logger.info("Loading more completed tickets")
                 st.session_state.completed_tickets_limit = st.session_state.get(
                         "completed_tickets_limit", 10
                     ) + 10
@@ -262,6 +314,7 @@ def main():
             )
 
         else:
+            logger.info("No completed tickets found")
             st.sidebar.info("No completed tickets found.")
 
 
@@ -271,22 +324,27 @@ def main():
 
     # Priority: Pending ticket view
     if current_pending_ticket:
+        logger.info(f"Selected Pending Ticket: {current_pending_ticket['ticket_id']}")
         MODE = "pending"
         current_ticket = current_pending_ticket
 
     elif current_drafted_ticket:
+        logger.info(f"Selected Drafted Ticket: {current_drafted_ticket['ticket_id']}")
         MODE = "drafted"
         current_ticket = current_drafted_ticket
 
     elif current_escalated_ticket:
+        logger.info(f"Selected Escalated Ticket: {current_escalated_ticket['ticket_id']}")
         MODE = "escalated"
         current_ticket = current_escalated_ticket
 
     elif current_completed_ticket:
+        logger.info(f"Selected Completed Ticket: {current_completed_ticket['ticket_id']}")
         MODE = "completed"
         current_ticket = current_completed_ticket
 
     else:
+        logger.warning("No ticket selected")
         st.info("Please select a ticket from the sidebar.")
         st.stop()
 
@@ -308,16 +366,41 @@ def main():
             None
         """
 
-        # Perform database logic
-        if purpose == "pending":
-            move_pending_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
-        if purpose == "drafted":
-            move_drafted_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
-        if purpose == "escalated":
-            move_escalated_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
+        try:
+            logger.info(f"Moving ticket {ticket_id} to completed (Purpose: {purpose})")
+            success = False
 
-        # Save the success message in session state
-        st.session_state["success_msg"] = f"Ticket {ticket_id} approved and moved to completed!"
+            # Perform database logic
+            if purpose == "pending":
+                success = move_pending_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
+            if purpose == "drafted":
+                success = move_drafted_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
+            if purpose == "escalated":
+                success = move_escalated_ticket_to_completed_in_db(ticket_id=ticket_id, response=resp)
+
+            if success:
+                logger.info(f"Successfully moved ticket {ticket_id} to completed")
+                # Save the success message in session state
+                st.session_state["success_msg"] = f"Ticket {ticket_id} approved and moved to completed!"
+            else:
+                logger.error(f"Failed to move ticket {ticket_id} to completed")
+                st.session_state["success_msg"] = f"Error: Failed to move ticket {ticket_id}."
+        except Exception as e:
+            logger.error(f"Exception in move_tickets_to_completed_tickets_in_db: {e}")
+            st.session_state["success_msg"] = f"Error: An unexpected error occurred while moving ticket {ticket_id}."
+
+    def handle_escalation_click(ticket_id: str, collection_name: str) -> None:
+        try:
+            logger.info(f"Escalating ticket {ticket_id} from {collection_name}")
+            if move_tickets_to_escalated_tickets_in_db(ticket_id, collection_name):
+                logger.info(f"Successfully escalated ticket {ticket_id}")
+                st.session_state["success_msg"] = f"Ticket {ticket_id} escalated!"
+            else:
+                logger.error(f"Failed to escalate ticket {ticket_id}")
+                st.session_state["success_msg"] = f"Error: Failed to escalate ticket {ticket_id}."
+        except Exception as e:
+            logger.error(f"Exception in handle_escalation_click: {e}")
+            st.session_state["success_msg"] = f"Error: An unexpected error occurred while escalating ticket {ticket_id}."
 
 
     if MODE == "pending":
@@ -372,7 +455,7 @@ def main():
                 st.button(
                     "🚩 Escalate",
                     key=f"escalate_{current_ticket['ticket_id']}",
-                    on_click=move_tickets_to_escalated_tickets_in_db,
+                    on_click=handle_escalation_click,
                     args=(current_ticket['ticket_id'], 'pending_tickets')
                 )
 
@@ -389,33 +472,41 @@ def main():
                 st.write(current_ticket.get("ticket_creation_time", "N/A"))
 
             with st.expander("🔁 Similar Past Tickets"):
-                fetched_similar_past_tickets = fetch_similar_past_tickets(
-                    current_ticket['issue'],
-                    open_ai_key=OPEN_AI_KEY
-                )
+                try:
+                    fetched_similar_past_tickets = fetch_similar_past_tickets(
+                        current_ticket['issue'],
+                        open_ai_key=OPEN_AI_KEY
+                    )
 
-                # print("#########: ", fetched_similar_past_tickets)
+                    # print("#########: ", fetched_similar_past_tickets)
 
-                if fetched_similar_past_tickets:
-                    for i, past_tickets in enumerate(fetched_similar_past_tickets, 1):
-                        st.markdown(f"**{i}**. Confidence: `{past_tickets[1]}`")
+                    if fetched_similar_past_tickets:
+                        for i, past_tickets in enumerate(fetched_similar_past_tickets, 1):
+                            st.markdown(f"**{i}**. Confidence: `{past_tickets[1]}`")
 
-                        with st.expander("View Past Tickets"):
-                            st.write(f"**Issue**: {past_tickets[0].page_content}")
-                            st.write(f"**Resolution**:  {past_tickets[0].metadata['resolution']}")
+                            with st.expander("View Past Tickets"):
+                                st.write(f"**Issue**: {past_tickets[0].page_content}")
+                                st.write(f"**Resolution**:  {past_tickets[0].metadata['resolution']}")
+                except Exception as e:
+                    logger.error(f"Error fetching similar past tickets: {e}")
+                    st.error("Failed to fetch similar past tickets.")
 
             with st.expander("🔁 Related Policy"):
-                fetched_similar_policy = fetch_similar_policy(
-                    issue=current_ticket['issue'],
-                    open_ai_key=OPEN_AI_KEY
-                )
+                try:
+                    fetched_similar_policy = fetch_similar_policy(
+                        issue=current_ticket['issue'],
+                        open_ai_key=OPEN_AI_KEY
+                    )
 
-                # print(fetched_similar_policy)
-                if fetched_similar_policy:
-                    for i, policy in enumerate(fetched_similar_policy, 1):
-                        st.markdown(f"**{i}**. Confidence: `{1 / (1 + (policy[1]))}`")
-                        with st.expander("View Policy"):
-                            st.write(policy[0].page_content)
+                    # print(fetched_similar_policy)
+                    if fetched_similar_policy:
+                        for i, policy in enumerate(fetched_similar_policy, 1):
+                            st.markdown(f"**{i}**. Confidence: `{1 / (1 + (policy[1]))}`")
+                            with st.expander("View Policy"):
+                                st.write(policy[0].page_content)
+                except Exception as e:
+                    logger.error(f"Error fetching similar policy: {e}")
+                    st.error("Failed to fetch related policy.")
 
             st.slider(
                 "Adjust Rephrase Temperature:",
@@ -485,7 +576,7 @@ def main():
                 st.button(
                     "🚩 Escalate",
                     key=f"escalate_{current_ticket['ticket_id']}",
-                    on_click=move_tickets_to_escalated_tickets_in_db,
+                    on_click=handle_escalation_click,
                     args=(current_ticket['ticket_id'], 'ai_pending_drafted_tickets')
                 )
 
@@ -496,33 +587,41 @@ def main():
 
             with st.expander("🔁 Similar Past Tickets"):
 
-                fetched_similar_past_tickets = fetch_similar_past_tickets(
-                    issue=current_ticket['issue'],
-                    open_ai_key=OPEN_AI_KEY
-                )
-                # print("%%%", fetched_similar_past_tickets)
-
-                if fetched_similar_past_tickets:
-                    for i, tickets in enumerate(fetched_similar_past_tickets, 1):
-                        st.markdown(f"**{i}**. Confidence: {1 / (1 + tickets[1])}")
-
-                        with st.expander("Reference Tickets"):
-                            st.write(f"**Issue**: {tickets[0].page_content}")
-                            st.write(f"**Resolution**: {tickets[0].metadata['resolution']}")
-
-            with st.expander("📄 Matched Policy", expanded=True):
-                fetched_similar_policy = fetch_similar_policy(
+                try:
+                    fetched_similar_past_tickets = fetch_similar_past_tickets(
                         issue=current_ticket['issue'],
                         open_ai_key=OPEN_AI_KEY
                     )
+                    # print("%%%", fetched_similar_past_tickets)
 
-                # print("$$$$$$$",fetched_similar_policy)
-                if fetched_similar_policy:
-                    for i, policy in enumerate(fetched_similar_policy, 1):
-                        st.markdown(f"**{i}**. Confidence: {1 / (1 + policy[1])}")
+                    if fetched_similar_past_tickets:
+                        for i, tickets in enumerate(fetched_similar_past_tickets, 1):
+                            st.markdown(f"**{i}**. Confidence: {1 / (1 + tickets[1])}")
 
-                        with st.expander("View Policy"):
-                            st.write(policy[0].page_content)
+                            with st.expander("Reference Tickets"):
+                                st.write(f"**Issue**: {tickets[0].page_content}")
+                                st.write(f"**Resolution**: {tickets[0].metadata['resolution']}")
+                except Exception as e:
+                    logger.error(f"Error fetching similar past tickets: {e}")
+                    st.error("Failed to fetch similar past tickets.")
+
+            with st.expander("📄 Matched Policy", expanded=True):
+                try:
+                    fetched_similar_policy = fetch_similar_policy(
+                            issue=current_ticket['issue'],
+                            open_ai_key=OPEN_AI_KEY
+                        )
+
+                    # print("$$$$$$$",fetched_similar_policy)
+                    if fetched_similar_policy:
+                        for i, policy in enumerate(fetched_similar_policy, 1):
+                            st.markdown(f"**{i}**. Confidence: {1 / (1 + policy[1])}")
+
+                            with st.expander("View Policy"):
+                                st.write(policy[0].page_content)
+                except Exception as e:
+                    logger.error(f"Error fetching similar policy: {e}")
+                    st.error("Failed to fetch matched policy.")
 
             st.slider(
                 "Adjust Rephrase Temperature:",
@@ -593,32 +692,40 @@ def main():
 
             with st.expander("🔁 Similar Past Tickets"):
 
-                fetched_similar_past_tickets = fetch_similar_past_tickets(
-                    issue=current_ticket['issue'],
-                    open_ai_key=OPEN_AI_KEY
-                )
-                # print("%%%", fetched_similar_past_tickets)
+                try:
+                    fetched_similar_past_tickets = fetch_similar_past_tickets(
+                        issue=current_ticket['issue'],
+                        open_ai_key=OPEN_AI_KEY
+                    )
+                    # print("%%%", fetched_similar_past_tickets)
 
-                if fetched_similar_past_tickets:
-                    for i, tickets in enumerate(fetched_similar_past_tickets, 1):
-                        st.markdown(f"**{i}**. Confidence: {1 / (1 + tickets[1])}")
+                    if fetched_similar_past_tickets:
+                        for i, tickets in enumerate(fetched_similar_past_tickets, 1):
+                            st.markdown(f"**{i}**. Confidence: {1 / (1 + tickets[1])}")
 
-                        with st.expander("Reference Tickets"):
-                            st.write(f"**Issue**: {tickets[0].page_content}")
-                            st.write(f"**Resolution**: {tickets[0].metadata['resolution']}")
+                            with st.expander("Reference Tickets"):
+                                st.write(f"**Issue**: {tickets[0].page_content}")
+                                st.write(f"**Resolution**: {tickets[0].metadata['resolution']}")
+                except Exception as e:
+                    logger.error(f"Error fetching similar past tickets: {e}")
+                    st.error("Failed to fetch similar past tickets.")
 
             with st.expander("📄 Matched Policy", expanded=True):
-                fetched_similar_policy = fetch_similar_policy(
-                    issue=current_ticket['issue'], open_ai_key=OPEN_AI_KEY
-                )
+                try:
+                    fetched_similar_policy = fetch_similar_policy(
+                        issue=current_ticket['issue'], open_ai_key=OPEN_AI_KEY
+                    )
 
-                # print("$$$$$$$",fetched_similar_policy)
-                if fetched_similar_policy:
-                    for i, policy in enumerate(fetched_similar_policy, 1):
-                        st.markdown(f"**{i}**. Confidence: {1 / (1 + policy[1])}")
+                    # print("$$$$$$$",fetched_similar_policy)
+                    if fetched_similar_policy:
+                        for i, policy in enumerate(fetched_similar_policy, 1):
+                            st.markdown(f"**{i}**. Confidence: {1 / (1 + policy[1])}")
 
-                        with st.expander("View Policy"):
-                            st.write(policy[0].page_content)
+                            with st.expander("View Policy"):
+                                st.write(policy[0].page_content)
+                except Exception as e:
+                    logger.error(f"Error fetching similar policy: {e}")
+                    st.error("Failed to fetch matched policy.")
 
             st.slider(
                 "Adjust Rephrase Temperature:",

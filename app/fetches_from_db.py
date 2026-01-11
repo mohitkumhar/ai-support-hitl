@@ -15,6 +15,7 @@ from pymongo.errors import ConnectionFailure
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 
+from app.logger import logger
 from response_drafting_utils import ResponseDraftingOutput
 from app.utils import (
         get_embedding_model,
@@ -27,6 +28,7 @@ load_dotenv()
 
 OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
+logger.info("Connecting to MongoDB...")
 #  connecting to DB
 client = pymongo.MongoClient(os.getenv("MONGO_URI"))
 db = client["ai_support_system"]
@@ -35,10 +37,12 @@ pending_tickets_collection = db["pending_tickets"]
 draft_tickets_collection = db['draft_tickets']
 
 
+logger.info("Initializing Embedding Model and LLM...")
 # creating embedding model object
 embeddings = get_embedding_model(open_ai_key=OPEN_AI_KEY)
 llm = get_llm_object(open_ai_key=OPEN_AI_KEY)
 
+logger.info("Connecting to Vector DBs...")
 # connecting to vector DB Chroma
 policy_vector_db = connect_policy_vectordb(open_ai_key=OPEN_AI_KEY)
 previous_record_vector_db = connect_previous_record_vector_db(open_ai_key=OPEN_AI_KEY)
@@ -64,6 +68,7 @@ def response_drafting(
 
     """
 
+    logger.info(f"Drafting response for ticket: {ticket_id}")
     parser = PydanticOutputParser(pydantic_object=ResponseDraftingOutput)
 
     prompt = PromptTemplate(
@@ -108,6 +113,7 @@ def response_drafting(
         previous_record=previous_record or "No Previous Records Found",
     )
 
+    logger.info("Invoking LLM for response drafting...")
     llm_result = llm.invoke(prompt)
     structured_output = parser.parse(llm_result.content)
 
@@ -143,6 +149,7 @@ def save_draft_to_db(
         None
     """
 
+    logger.info(f"Saving draft to DB for ticket: {ticket_id}")
     draft_tickets_collection.insert_one({
         "ticket_id": ticket_id,
         "issue": issue,
@@ -170,6 +177,7 @@ def perform_ai_drafting(
         None
     """
 
+    logger.info(f"Performing AI drafting for ticket: {ticket['ticket_id']}")
     ticket_id = ticket['ticket_id']
     issue = ticket['issue']
     ticket_creation_time = ticket['ticket_creation_time']
@@ -177,6 +185,7 @@ def perform_ai_drafting(
 
     # fetching policy and metadata
 
+    logger.info("Fetching relevant policy and previous records...")
     retrieved_policy = policy_vector_db.similarity_search_with_score(issue, k=3)
     retrieved_records = previous_record_vector_db.similarity_search_with_score(issue, k=5)
 
@@ -204,6 +213,7 @@ def perform_ai_drafting(
 
 if __name__ == "__main__":
 
+    logger.info("Starting AI Drafting Service...")
     while True:
 
         new_ticket = pending_tickets_collection.find_one_and_update(
@@ -217,9 +227,9 @@ if __name__ == "__main__":
             continue
 
         try:
-            print("Processing Ticket ID:", new_ticket["ticket_id"])
+            logger.info(f"Processing Ticket ID: {new_ticket['ticket_id']}")
             perform_ai_drafting(new_ticket)
-            print(f"Ticket ID: {new_ticket['ticket_id']} is Successfully Drafted")
+            logger.info(f"Ticket ID: {new_ticket['ticket_id']} is Successfully Drafted")
 
         except ConnectionFailure as e:
             # rollback if AI crashes
@@ -229,4 +239,4 @@ if __name__ == "__main__":
                     "$set": {"metadata.drafted": False}
                 }
             )
-            print("Error processing ticket:", e)
+            logger.error(f"Error processing ticket: {e}")
