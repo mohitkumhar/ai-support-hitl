@@ -7,15 +7,15 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from dotenv import load_dotenv
 from app.logger import logger
-
+import os
 load_dotenv()
 
 
 # 1. Setup MongoDB Connection
-# client = MongoClient(os.getenv("MONGO_URI"))
-
 logger.info("Connecting to MongoDB at localhost:27017 for sample data generation...")
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(os.getenv("MONGO_URI"))
+
+# client = MongoClient("mongodb://localhost:27017/")   # uncomment this line if not using Docker
 db = client["ai_support_system"]
 
 
