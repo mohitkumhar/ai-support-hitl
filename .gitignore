@@ -3,3 +3,5 @@
 /.ipynb_checkpoints
 /.ruff_cache
 /.venv
+**/*.pyc
+__pycache__/

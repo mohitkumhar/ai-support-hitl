@@ -18,6 +18,8 @@ from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+from app.logger import logger
+
 load_dotenv()
 
 OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
@@ -37,11 +39,17 @@ def connect_mongo_db(
     Returns:
         _type_: Collection: MongoDB Collection Object
     """
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
-    db = client[database_name]
-    collection = db[collection_name]
+    try:
+        logger.info(f"Connecting to MongoDB collection: {collection_name}")
+        client = pymongo.MongoClient(os.getenv("MONGO_URI"))
+        db = client[database_name]
+        collection = db[collection_name]
 
-    return collection
+        return collection
+
+    except PyMongoError as e:
+        logger.error(f"Error connecting to MongoDB: {e}")
+        raise e
 
 
 # creating LLM Model Object
@@ -64,15 +72,20 @@ def get_llm_object(
     Returns:
         _type_: ChatOpenAI: LLM Model Object
     """
-    llm = ChatOpenAI(
-            model_name=model_name,
-            api_key=open_ai_key,
-            base_url=base_url,
-            temperature=temperature,
-            verbose=verbose,
-        )
+    try:
+        logger.info(f"Creating LLM object with model: {model_name}")
+        llm = ChatOpenAI(
+                model_name=model_name,
+                api_key=open_ai_key,
+                base_url=base_url,
+                temperature=temperature,
+                verbose=verbose,
+            )
 
-    return llm
+        return llm
+    except Exception as e:
+        logger.error(f"Error creating LLM object: {e}")
+        raise e
 
 
 # creating embedding model object
@@ -87,14 +100,18 @@ def get_embedding_model(
     Returns:
         OpenAIEmbeddings: OpenAIEmbeddings: Embedding Model Object
     """
-    embeddings = OpenAIEmbeddings(
-        api_key=open_ai_key,
-        model="text-embedding-3-large",
-        base_url="https://openrouter.ai/api/v1",
-    )
+    try:
+        logger.info("Creating OpenAI Embeddings object")
+        embeddings = OpenAIEmbeddings(
+            api_key=open_ai_key,
+            model="text-embedding-3-large",
+            base_url="https://openrouter.ai/api/v1",
+        )
 
-    return embeddings
-
+        return embeddings
+    except Exception as e:
+        logger.error(f"Error creating Embedding model object: {e}")
+        raise e
 
 # connecting to vector DB Chroma
 
@@ -109,13 +126,18 @@ def connect_policy_vectordb(
     Returns:
         _type_: Chroma: VectorDB Object
     """
-    policy_vector_db = Chroma(
-        embedding_function=get_embedding_model(open_ai_key=open_ai_key),
-        collection_name="Policy",
-        persist_directory="Company_Info_VectorDB"
-    )
+    try:
+        logger.info("Connecting to Policy VectorDB")
+        policy_vector_db = Chroma(
+            embedding_function=get_embedding_model(open_ai_key=open_ai_key),
+            collection_name="Policy",
+            persist_directory="Company_Info_VectorDB"
+        )
 
-    return policy_vector_db
+        return policy_vector_db
+    except Exception as e:
+        logger.error(f"Error connecting to Policy VectorDB: {e}")
+        raise e
 
 
 def connect_previous_record_vector_db(
@@ -129,14 +151,19 @@ def connect_previous_record_vector_db(
     Returns:
         _type_: Chroma: VectorDB Object
     """
+    try:
+        logger.info("Connecting to Previous Records VectorDB")
+        previous_record_vector_db = Chroma(
+            collection_name="PreviousData",
+            embedding_function=get_embedding_model(open_ai_key=open_ai_key),
+            persist_directory="Company_Info_VectorDB"
+        )
 
-    previous_record_vector_db = Chroma(
-        collection_name="PreviousData",
-        embedding_function=get_embedding_model(open_ai_key=open_ai_key),
-        persist_directory="Company_Info_VectorDB"
-    )
+        return previous_record_vector_db
 
-    return previous_record_vector_db
+    except Exception as e:
+        logger.error(f"Error connecting to Previous Records VectorDB: {e}")
+        raise e
 
 
 def fetch_confidence_score(
@@ -150,15 +177,20 @@ def fetch_confidence_score(
     Returns:
         _type_: float: Confidence Score
     """
-    previous_record_vector_db = connect_previous_record_vector_db(open_ai_key=OPEN_AI_KEY)
-    previous_record_retriever = previous_record_vector_db.similarity_search_with_score(issue, k=3)
+    try:
+        logger.info(f"Fetching confidence score for issue: {issue[:50]}...")
+        previous_record_vector_db = connect_previous_record_vector_db(open_ai_key=OPEN_AI_KEY)
+        previous_record_retriever = previous_record_vector_db.similarity_search_with_score(issue, k=3)
 
-    store = {}
+        store = {}
 
-    for doc, distance in previous_record_retriever:
-        store[doc.page_content] = (doc.metadata['ticket_id'], 1 / (1 + distance))
+        for doc, distance in previous_record_retriever:
+            store[doc.page_content] = (doc.metadata['ticket_id'], 1 / (1 + distance))
 
-    return store
+        return store
+    except Exception as e:
+        logger.error(f"Error fetching confidence score: {e}")
+        raise e
 
 
 def connect_vector_db(
@@ -174,19 +206,25 @@ def connect_vector_db(
     Returns:
         _type_: Chroma: VectorDB Object
     """
-    embeddings = OpenAIEmbeddings(
-        api_key=open_ai_key,
-        model="text-embedding-3-large",
-        base_url="https://openrouter.ai/api/v1",
-    )
+    try:
+        logger.info(f"Connecting to VectorDB collection: {collection_name}")
+        embeddings = OpenAIEmbeddings(
+            api_key=open_ai_key,
+            model="text-embedding-3-large",
+            base_url="https://openrouter.ai/api/v1",
+        )
 
-    vector_db = Chroma(
-        collection_name=collection_name,
-        embedding_function=embeddings,
-        persist_directory="Company_Info_VectorDB",
-    )
+        vector_db = Chroma(
+            collection_name=collection_name,
+            embedding_function=embeddings,
+            persist_directory="Company_Info_VectorDB",
+        )
 
-    return vector_db
+        return vector_db
+
+    except Exception as e:
+        logger.error(f"Error connecting to VectorDB: {e}")
+        raise e
 
 
 def fetch_similar_past_tickets(
@@ -202,11 +240,16 @@ def fetch_similar_past_tickets(
     Returns:
         _type_: List[str]: List of similar past tickets
     """
-    vector_db = connect_vector_db(collection_name="PreviousData", open_ai_key=open_ai_key)
+    try:
+        logger.info(f"Fetching similar past tickets for issue: {issue[:50]}...")
+        vector_db = connect_vector_db(collection_name="PreviousData", open_ai_key=open_ai_key)
 
-    similar_records = vector_db.similarity_search_with_score(query=issue, k=3)
+        similar_records = vector_db.similarity_search_with_score(query=issue, k=3)
 
-    return similar_records
+        return similar_records
+    except Exception as e:
+        logger.error(f"Error fetching similar past tickets: {e}")
+        raise e
 
 
 def fetch_similar_policy(
@@ -222,11 +265,16 @@ def fetch_similar_policy(
     Returns:
         _type_: List[str]: List of Similar Policies
     """
-    vector_db = connect_vector_db(collection_name="Policy", open_ai_key=open_ai_key)
+    try:
+        logger.info(f"Fetching similar policy for issue: {issue[:50]}...")
+        vector_db = connect_vector_db(collection_name="Policy", open_ai_key=open_ai_key)
 
-    similar_docs = vector_db.similarity_search_with_score(query=issue, k=3)
+        similar_docs = vector_db.similarity_search_with_score(query=issue, k=3)
 
-    return similar_docs
+        return similar_docs
+    except Exception as e:
+        logger.error(f"Error fetching similar policy: {e}")
+        raise e
 
 
 def fetch_ai_drafted_document(
@@ -241,9 +289,13 @@ def fetch_ai_drafted_document(
         _type_: pymongo.cursor.Cursor: Cursor Object containing the drafted document
     """
 
-    ai_drafted_tickets_collection = connect_mongo_db("ai_pending_drafted_tickets")
-    return ai_drafted_tickets_collection.find({'ticket_id': ticket_id})
-
+    try:
+        logger.info(f"Fetching AI drafted document for ticket: {ticket_id}")
+        ai_drafted_tickets_collection = connect_mongo_db("ai_pending_drafted_tickets")
+        return ai_drafted_tickets_collection.find({'ticket_id': ticket_id})
+    except PyMongoError as e:
+        logger.error(f"Error fetching AI drafted document: {e}")
+        raise e
 
 def fetch_ticket_response_and_confidence(
             ticket_id: str
@@ -256,14 +308,20 @@ def fetch_ticket_response_and_confidence(
     Returns:
         _type_: tuple: Tuple containing the drafted response and confidence score
     """
-    ai_drafted_response = ''
-    ai_drafted_response_confidence = 0
+    try:
+        logger.info(f"Fetching ticket response and confidence for ticket: {ticket_id}")
+        ai_drafted_response = ''
+        ai_drafted_response_confidence = 0
 
-    for values in fetch_ai_drafted_document(ticket_id):
-        ai_drafted_response = values['reply']
-        ai_drafted_response_confidence = values['confidence']
+        for values in fetch_ai_drafted_document(ticket_id):
+            ai_drafted_response = values['reply']
+            ai_drafted_response_confidence = values['confidence']
 
-        return ai_drafted_response, ai_drafted_response_confidence
+            return ai_drafted_response, ai_drafted_response_confidence
+
+    except PyMongoError as e:
+        logger.error(f"Error fetching ticket response and confidence: {e}")
+        raise e
 
 
 def remove_drafted_ticket_from_db(
@@ -277,13 +335,15 @@ def remove_drafted_ticket_from_db(
     Returns:
         _type_: bool: True if the ticket is removed successfully
     """
+    logger.info(f"Removing drafted ticket: {ticket_id}")
     try:
         drafted_pending_tickets_collection = connect_mongo_db("ai_pending_drafted_tickets")
         drafted_pending_tickets_collection.delete_one({'ticket_id': ticket_id})
+        logger.info(f"Successfully removed drafted ticket: {ticket_id}")
         return True
 
     except PyMongoError as e:
-        print(f"Error removing drafted ticket: {e}")
+        logger.error(f"Error removing drafted ticket: {e}")
         return False
 
 
@@ -301,6 +361,7 @@ def move_escalated_ticket_to_completed_in_db(
         _type_: bool: True if the ticket is moved successfully
     """
 
+    logger.info(f"Moving escalated ticket {ticket_id} to completed")
     try:
         escalated_tickets_collection = connect_mongo_db(collection_name="escalated_tickets")
         completed_tickets_collection = connect_mongo_db(collection_name="solved_tickets")
@@ -329,10 +390,11 @@ def move_escalated_ticket_to_completed_in_db(
                 }
         })
 
+        logger.info(f"Successfully moved escalated ticket {ticket_id} to completed")
         return True
 
     except PyMongoError as e:
-        print(f"Error moving escalated ticket to completed: {e}")
+        logger.error(f"Error moving escalated ticket to completed: {e}")
         return False
 
 
@@ -350,6 +412,7 @@ def move_pending_ticket_to_completed_in_db(
         _type_: bool: True if the ticket is moved successfully, False otherwise
     """
 
+    logger.info(f"Moving pending ticket {ticket_id} to completed")
     try:
         pending_tickets_collection = connect_mongo_db("pending_tickets")
         completed_tickets_collection = connect_mongo_db("solved_tickets")
@@ -388,10 +451,11 @@ def move_pending_ticket_to_completed_in_db(
                 }
         })
 
+        logger.info(f"Successfully moved pending ticket {ticket_id} to completed")
         return True
 
     except PyMongoError as e:
-        print(f"Error moving pending ticket to completed: {e}")
+        logger.error(f"Error moving pending ticket to completed: {e}")
         return False
 
 
@@ -409,12 +473,13 @@ def move_drafted_ticket_to_completed_in_db(
         _type_: bool: True if the ticket is moved successfully, False otherwise
     """
 
+    logger.info(f"Moving drafted ticket {ticket_id} to completed")
     try:
         drafted_ticket_collection = connect_mongo_db(collection_name="ai_pending_drafted_tickets")
         completed_tickets_collection = connect_mongo_db(collection_name="solved_tickets")
 
         ticket_to_move = drafted_ticket_collection.find_one_and_delete({"ticket_id": ticket_id})
-        print(ticket_to_move)
+        logger.debug(f"Ticket to move: {ticket_to_move}")
         ticket_to_move.pop('_id', None)
 
         completed_tickets_collection.insert_one({
@@ -437,10 +502,11 @@ def move_drafted_ticket_to_completed_in_db(
                 }
         })
 
+        logger.info(f"Successfully moved drafted ticket {ticket_id} to completed")
         return True
 
     except PyMongoError as e:
-        print(f"Error moving drafted ticket to completed: {e}")
+        logger.error(f"Error moving drafted ticket to completed: {e}")
         return False
 
 
@@ -459,6 +525,7 @@ def call_llm_to_rephase(
         _type_: str: Rephased Text
     """
 
+    logger.info(f"Calling LLM to rephase text with temperature: {temperature}")
     prompt_template = PromptTemplate(
         template="""
         Your task is to rephase the given text to make it more polite and professional.
@@ -480,7 +547,7 @@ def call_llm_to_rephase(
 
     final_chain = prompt_template | llm | parser
 
-    print("This is utils, func: ", temperature, current_text)
+    logger.debug(f"Rephasing input - Temp: {temperature}, Text: {current_text[:50]}...")
 
     return final_chain.invoke(current_text)
 
@@ -500,18 +567,20 @@ def move_tickets_to_escalated_tickets_in_db(
         _type_: bool: True if the ticket is moved successfully, False otherwise
     """
 
+    logger.info(f"Moving ticket {ticket_id} from {from_collection_name} to escalated")
     try:
 
         from_collection = connect_mongo_db(collection_name=from_collection_name)
         escalated_collection = connect_mongo_db(collection_name="escalated_tickets")
 
         ticket_to_move = from_collection.find_one_and_delete({"ticket_id": ticket_id})
-        print("Ticket to move:", ticket_to_move, from_collection_name, ticket_id)
+        logger.debug(f"Ticket to move: {ticket_to_move}, Source: {from_collection_name}, ID: {ticket_id}")
         ticket_to_move.pop('_id', None)
 
         escalated_collection.insert_one(ticket_to_move)
+        logger.info(f"Successfully moved ticket {ticket_id} to escalated")
         return True
 
     except PyMongoError as e:
-        print(f"Error moving ticket to escalated: {e}")
+        logger.error(f"Error moving ticket to escalated: {e}")
         return False

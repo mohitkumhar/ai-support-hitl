@@ -7,11 +7,13 @@ services:
     ports:
       - "8080:8501"
     env_file:
-      - ../.env
+      - ./.env
     restart: unless-stopped
     depends_on:
       - mongo
       - mongo-express
+    volumes:
+      - ./logs:/app/logs # Ensure your app writes logs to /app/logs inside the container
 
 
   mongo:
@@ -36,6 +38,40 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: admin
     depends_on:
       - mongo
+    restart: unless-stopped
+
+
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: loki
+    ports:
+      - "3100:3100"
+
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: promtail
+
+    ports:
+      - "9080:9080"
+
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - ./logs:/var/log/app_logs
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    
+    depends_on:
+      - loki
+
     restart: unless-stopped
 
 volumes:
