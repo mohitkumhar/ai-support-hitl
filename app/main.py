@@ -51,10 +51,14 @@ def main():
 
     def check_ticket_exists(ticket_id: str) -> bool:
         """Check if ticket_id exists in any collection."""
-        if pending_tickets_collection.find_one({"ticket_id": ticket_id}): return True
-        if pending_drafted_ticket_collection.find_one({"ticket_id": ticket_id}): return True
-        if escalated_tickets_collection.find_one({"ticket_id": ticket_id}): return True
-        if solved_tickets_collection.find_one({"ticket_id": ticket_id}): return True
+        if pending_tickets_collection.find_one({"ticket_id": ticket_id}):
+            return True
+        if pending_drafted_ticket_collection.find_one({"ticket_id": ticket_id}):
+            return True
+        if escalated_tickets_collection.find_one({"ticket_id": ticket_id}): 
+            return True
+        if solved_tickets_collection.find_one({"ticket_id": ticket_id}): 
+            return True
         return False
 
     logger.info("Setting up Streamlit page configuration...")
