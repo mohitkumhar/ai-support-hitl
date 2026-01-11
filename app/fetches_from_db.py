@@ -30,7 +30,7 @@ OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
 logger.info("Connecting to MongoDB...")
 #  connecting to DB
-client = pymongo.MongoClient(os.getenv("MONGO_URI"))
+client = pymongo.MongoClient("mongo://localhost:27017/")
 db = client["ai_support_system"]
 
 pending_tickets_collection = db["pending_tickets"]
