@@ -4,6 +4,9 @@ services:
   hitl:
     image: mohitkumhar/ai-support-hitl:latest
     container_name: ai-support-hitl
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     ports:
       - "8080:8501"
     env_file:

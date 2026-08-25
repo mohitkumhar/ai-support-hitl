@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - AI Support</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .nav { margin-bottom: 20px; }
+        .nav a { text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .ticket { background: white; border: 1px solid #dee2e6; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .ticket h3 { margin-top: 0; color: #495057; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .ticket-details { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .ticket-details strong { display: inline-block; width: 150px; color: #495057; }
+        
+        .ai-tools { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s; }
+        .btn-primary { background-color: #0d6efd; color: white; }
+        .btn-primary:hover { background-color: #0b5ed7; }
+        .btn-success { background-color: #198754; color: white; }
+        .btn-success:hover { background-color: #157347; }
+        .btn-warning { background-color: #ffc107; color: #000; }
+        .btn-warning:hover { background-color: #ffca2c; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #bb2d3b; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-family: inherit; margin-bottom: 15px; box-sizing: border-box; }
+        .form-group { margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+        .action-buttons { display: flex; gap: 10px; justify-content: flex-end; }
+        
+        .ai-results { margin-top: 10px; padding: 15px; background: #e9ecef; border-radius: 5px; display: none; font-size: 0.9em; }
+        .ai-results h4 { margin-top: 0; color: #495057; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">&larr; Back to Dashboard</a>
+        </div>
+
+        <h1>{{ title }}</h1>
+
+        {% if tickets %}
+            {% for ticket in tickets %}
+                <div class="ticket">
+                    <h3>Ticket ID: {{ ticket.get('ticket_id', 'Unknown') }}</h3>
+                    
+                    <div class="ticket-details">
+                        {% for key, value in ticket.items() %}
+                            {% if key not in ['_id', 'ticket_id', 'reply'] %}
+                                <div style="margin-bottom: 5px;">
+                                    <strong>{{ key|replace('_', ' ')|title }}:</strong> 
+                                    {% if key == 'metadata' and value is mapping %}
+                                        {{ value.get('category', '') }} ({{ value.get('priority', '') }})
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    {% if queue != 'completed' %}
+                    <div class="ai-tools">
+                        <button class="btn btn-secondary" onclick="fetchSimilar('{{ ticket.get('issue', '')|escape }}', 'ai-results-{{ ticket.get('ticket_id') }}')">🔍 Find Similar Past Tickets & Policies</button>
+                    </div>
+                    
+                    <div id="ai-results-{{ ticket.get('ticket_id') }}" class="ai-results"></div>
+
+                    <form action="/action" method="POST" class="form-group" id="form-{{ ticket.get('ticket_id') }}">
+                        <input type="hidden" name="ticket_id" value="{{ ticket.get('ticket_id', '') }}">
+                        <input type="hidden" name="queue" value="{{ queue }}">
+                        
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Draft Reply:</label>
+                        <textarea name="reply" id="reply-{{ ticket.get('ticket_id') }}" placeholder="Type your reply here...">{{ ticket.get('ai_drafted_response', '') }}</textarea>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                            <label>AI Temperature:</label>
+                            <input type="range" name="temperature" id="temp-{{ ticket.get('ticket_id') }}" min="0" max="1" step="0.1" value="0.5">
+                            <button type="button" class="btn btn-primary" onclick="rephraseText('{{ ticket.get('ticket_id') }}')">✨ Rephrase with AI</button>
+                            <span id="loading-{{ ticket.get('ticket_id') }}" style="display:none; color: #0d6efd;">Processing...</span>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            {% if queue in ['pending', 'drafted'] %}
+                                <button type="submit" name="action" value="escalate" class="btn btn-warning">🔥 Escalate Ticket</button>
+                            {% endif %}
+                            <button type="submit" name="action" value="resolve" class="btn btn-success">✅ Resolve Ticket</button>
+                        </div>
+                    </form>
+                    {% else %}
+                        <div class="ticket-details">
+                            <strong>Resolution:</strong>
+                            <p style="margin-top: 5px;">{{ ticket.get('resolution', 'No resolution text provided.') }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="ticket">
+                <p style="margin: 0; color: #6c757d;">No tickets found in this queue.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function rephraseText(ticketId) {
+            const replyBox = document.getElementById('reply-' + ticketId);
+            const tempBox = document.getElementById('temp-' + ticketId);
+            const loading = document.getElementById('loading-' + ticketId);
+            
+            const replyText = replyBox.value;
+            if (!replyText.trim()) {
+                alert('Please enter some text to rephrase!');
+                return;
+            }
+
+            loading.style.display = 'inline';
+            
+            const formData = new FormData();
+            formData.append('action', 'rephrase');
+            formData.append('ticket_id', ticketId);
+            formData.append('reply', replyText);
+            formData.append('temperature', tempBox.value);
+
+            fetch('/action', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.rephrased_text) {
+                    replyBox.value = data.rephrased_text;
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                alert('An error occurred while rephrasing.');
+            });
+        }
+
+        function fetchSimilar(issue, resultsContainerId) {
+            const container = document.getElementById(resultsContainerId);
+            container.style.display = 'block';
+            container.innerHTML = '<i>Searching vector database...</i>';
+
+            fetch('/similar?issue=' + encodeURIComponent(issue))
+            .then(response => response.json())
+            .then(data => {
+                let html = '<h4>📚 Relevant Information</h4>';
+                
+                if (data.policies && data.policies.length > 0) {
+                    html += '<strong>Company Policies:</strong><ul style="margin-top: 5px;">';
+                    data.policies.forEach(p => {
+                        html += `<li>${p.content} <br><small>Score: ${p.score.toFixed(2)}</small></li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                if (data.past_tickets && data.past_tickets.length > 0) {
+                    html += '<strong>Similar Past Tickets:</strong><ul style="margin-top: 5px;">';
+                    data.past_tickets.forEach(t => {
+                        html += `<li>${t.content} <br><small>Score: ${t.score.toFixed(2)}</small></li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                if (data.policies.length === 0 && data.past_tickets.length === 0) {
+                    html += '<p>No similar records found.</p>';
+                }
+
+                container.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = '<span style="color: red;">Error fetching similar records.</span>';
+            });
+        }
+    </script>
+</body>
+</html>

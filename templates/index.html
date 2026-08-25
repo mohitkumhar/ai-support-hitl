@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 40px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; margin-top: 0; }
+        .menu { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+        .menu a { 
+            display: block; padding: 15px 20px; background-color: #f1f3f5; 
+            border-radius: 6px; text-decoration: none; color: #495057; 
+            font-weight: 600; font-size: 1.1em; transition: all 0.2s; 
+            border: 1px solid #dee2e6;
+        }
+        .menu a:hover { background-color: #e9ecef; border-color: #ced4da; transform: translateY(-2px); }
+        .menu a span { color: #868e96; font-size: 0.9em; font-weight: normal; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ AI Support Co-Pilot</h1>
+        <p>Select a queue to view and manage customer tickets:</p>
+        
+        <div class="menu">
+            <a href="/pending">🎫 Pending Reviews <span>(New tickets awaiting agent review)</span></a>
+            <a href="/drafted">🤖 Drafted Reviews <span>(Tickets with AI-generated drafts)</span></a>
+            <a href="/escalated">🔥 Escalated Reviews <span>(Tickets requiring senior agent attention)</span></a>
+            <a href="/completed">✅ Completed Tickets <span>(Resolved and closed tickets)</span></a>
+        </div>
+    </div>
+</body>
+</html>
