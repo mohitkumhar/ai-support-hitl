@@ -1,126 +1,165 @@
-# AI Support Agent Dashboard (HITL)
+# 🧠 AI Support HITL
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=Streamlit&logoColor=white)](https://streamlit.io/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+**AI Support HITL** is a **Human-in-the-Loop (HITL)** support assistant built to help support teams draft, refine, review, and escalate support issues using AI—while keeping humans in control.
 
-**Repository:** [http://github.com/mohitkumhar/ai-support-hitl/](http://github.com/mohitkumhar/ai-support-hitl/)
+The app uses **LLMs + Vector DB (RAG)** and provides a **Streamlit UI** for interaction, feedback, and issue raising.
 
-## 📋 Overview
+---
 
-The **AI Support Human-in-the-Loop (HITL) Dashboard** is an intelligent customer support system designed to assist human agents by automating the initial drafting of responses. It leverages **Retrieval-Augmented Generation (RAG)** to ensure responses are grounded in company policy and consistent with past resolved tickets.
+## ✨ Key Features
 
-The system features a **Streamlit** dashboard where agents can review, edit, rephrase, and approve AI-generated drafts, ensuring high-quality support while reducing response times.
+- 🤖 AI-assisted support response drafting
+- ✍️ Human-in-the-Loop review and correction
+- 📚 Context-aware answers using Vector Database (RAG)
+- 🐞 Issue raising option directly from the app
+- 📈 Logs & observability support
+- 🧪 Testable and modular architecture
+- 🐳 Docker & Docker-Compose support
 
-## ✨ Features
-
--   **🤖 AI Response Drafting**: Automatically generates policy-compliant responses for incoming tickets using OpenAI GPT models.
--   **📚 RAG Context Engine**: Retrieves relevant company policies and similar past tickets (using ChromaDB) to provide context-aware answers.
--   **Human-in-the-Loop Workflow**:
-    -   **Pending**: View new tickets waiting for action.
-    -   **Drafted**: Review AI-generated drafts with confidence scores.
-    -   **Escalated**: Handle complex issues requiring senior attention.
-    -   **Completed**: Archive of resolved tickets.
--   **✍️ AI Rephasing Tool**: Allows agents to instantly rewrite responses to be more polite, professional, or empathetic using a temperature slider.
--   **📊 Confidence Scoring**: AI assigns a confidence score to drafts, alerting agents when manual review is critical.
--   **🗄️ Database Integration**: Full persistence using MongoDB for ticket lifecycle management.
-
-## 🛠️ Tech Stack
-
--   **Frontend**: [Streamlit](https://streamlit.io/)
--   **LLM Orchestration**: [LangChain](https://www.langchain.com/)
--   **LLM Provider**: OpenAI (GPT-4o-mini)
--   **Vector Database**: [ChromaDB](https://www.trychroma.com/)
--   **Database**: [MongoDB](https://www.mongodb.com/)
--   **Language**: Python 3.10+
+---
 
 ## 📂 Project Structure
 
-```text
-ai-support-hitl/
-├── app/
-│   ├── main.py                  # Main Streamlit dashboard logic
-│   ├── utils.py                 # Utilities for DB, LLM, and Vector Store
-│   ├── fetches_from_db.py       # Background service for AI drafting
-│   ├── logger.py                # Logging configuration
-│   └── response_drafting_utils.py # Pydantic schemas
-├── data/
-│   └── raw/policy/              # Company policy documents
-├── scripts/
-│   └── sample_data_generation.py # Script to seed MongoDB with test data
-├── .env                         # Environment variables (not committed)
-├── streamlit_app.py             # Entry point for the application
-└── README.md                    # Project documentation
 ```
+
+.
+├── .github/                    # GitHub workflows and configs
+├── Company_Info_VectorDB/      # Vector DB files (company knowledge base)
+├── app/                        # Core application logic
+├── data/                       # Input/output data
+├── logs/                       # Application logs
+├── notebooks/                  # Experiments and exploration
+├── scripts/                    # Helper scripts
+├── tests/                      # Unit & integration tests
+├── .dockerignore
+├── .flake8
+├── .gitignore
+├── .pylintrc
+├── .python-version
+├── Dockerfile
+├── docker-compose.yaml
+├── promtail-config.yml         # Log shipping configuration
+├── requirements.txt
+├── pyproject.toml
+├── uv.lock
+├── streamlit_app.py            # Streamlit entry point
+├── application_version.txt
+├── LICENSE
+└── README.md
+
+````
+
+---
+
+## 🧠 Human-in-the-Loop (HITL) Flow
+
+1. User submits a support query  
+2. AI generates a draft response using context from Vector DB  
+3. Human reviews, edits, or approves the response  
+4. Feedback is logged for improvement  
+5. Issues can be raised directly from the UI if needed  
+
+This ensures **accuracy, safety, and quality** in production support workflows.
+
+---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 1️⃣ Clone the Repository
 
--   Python 3.10 or higher
--   MongoDB (Local or Atlas) running on port `27017`
--   OpenAI API Key
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone http://github.com/mohitkumhar/ai-support-hitl/
-    cd ai-support-hitl
-    ```
-
-2.  **Create a virtual environment**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-
-3.  **Install dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Set up Environment Variables**
-    Create a `.env` file in the root directory:
-    ```ini
-    OPEN_AI_KEY=sk-your-openai-key-here
-    MONGO_URI=mongodb://localhost:27017/
-    ```
-
-5.  **Create Logs Directory**
-    Ensure a logs directory exists for the application logger.
-    ```bash
-    mkdir logs
-    ```
-
-## 🏃‍♂️ Usage Guide
-
-### 1. Generate Sample Data
-Populate your local MongoDB with sample tickets (Pending, Drafted, Solved, Escalated).
 ```bash
-python scripts/sample_data_generation.py
+git clone https://github.com/mohitkumhar/ai-support-hitl.git
+cd ai-support-hitl
+````
+
+---
+
+### 2️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
 ```
 
-### 2. Start the AI Drafting Service
-Run the background worker that watches for new pending tickets and drafts responses using the LLM.
-```bash
-python app/fetches_from_db.py
-```
-*Keep this terminal open.*
+(Optional but recommended: use a virtual environment)
 
-### 3. Launch the Dashboard
-Start the Streamlit interface for the support agents.
+---
+
+### 3️⃣ Environment Variables
+
+Create a `.env` file and add required API keys:
+
+```env
+OPEN_AI_KEY=your_api_key
+MONGO_URI=your_mongo_uri
+```
+
+---
+
+### 4️⃣ Run the Application
+
 ```bash
 streamlit run streamlit_app.py
 ```
 
+Open browser at:
+📍 `http://localhost:8501`
+
+---
+
+## 🐳 Run with Docker
+
+### Build & Start
+
+```bash
+docker compose up --build
+```
+
+---
+
+<!--
+## 🧪 Run Tests
+
+```bash
+pytest
+```
+---
+
+-->
+
+
+## 📊 Logging & Observability
+
+* Logs are stored in the `logs/` directory
+* `promtail-config.yml` can be used with **Grafana Loki**
+* Helps track AI behavior, feedback, and errors
+
+---
+
+## 🔒 License
+
+This project is licensed under the **MIT License**.
+See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👤 Author
+
+**Mohit Kumhar**
+GitHub: [https://github.com/mohitkumhar](https://github.com/mohitkumhar)  
+LinkedIn: [https://linkedin.com/in/mohitkumhar](https://linkedin.com/in/mohitkumhar)  
+LeetCode: [https://leetcode.com/mohitkumhar](https://leetcode.com/mohitkumhar)  
+
+---
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please check the `.github` folder for issue templates and pull request templates.
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes with clear messages
+4. Open a Pull Request
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+---
+
+## ⭐ If you like this project
+
+Give the repo a ⭐ and feel free to raise issues or suggestions!
